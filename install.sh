@@ -185,3 +185,4 @@ fi
 log "Installed Nicepage ${NPVER:-} to $DEST"
 ((INTEGRATE)) && log "Start it from your app menu or run: nicepage"
 ((INTEGRATE)) || log "Start it with: $DEST/nicepage"
+log "First start: sign in, then set your folders in Application > Preferences... (README: First start)"

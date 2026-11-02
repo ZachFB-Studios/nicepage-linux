@@ -23,13 +23,16 @@ Debian/Ubuntu: `sudo apt install wine curl p7zip-full binutils file`
 
 1. Download the Windows installer from [nicepage.com/download](https://nicepage.com/download)
    (`Nicepage-X.Y.Z.exe`). Any version works, including older ones your license covers.
-2. Run:
+2. Get this repo and run the script with your installer:
 
 ```sh
+git clone https://github.com/ZachFB-Studios/nicepage-linux
+cd nicepage-linux
 ./install.sh ~/Downloads/Nicepage-8.7.0.exe
 ```
 
-Then start **Nicepage** from your app menu, or run `nicepage`.
+It takes a few minutes and opens no windows. When it's done, **Nicepage** is in your app menu, and
+`nicepage` starts it from a terminal.
 
 What it does:
 
@@ -37,35 +40,105 @@ What it does:
    the installer silently in it.
 2. Reads which Electron version that Nicepage was built on, downloads the same version for Linux
    from Electron's GitHub releases and checks its SHA-256.
-3. Copies Nicepage's `resources/app.asar` into it, installs a launcher, an icon and a menu entry,
-   and deletes the Wine prefix.
+3. Copies Nicepage's app files into it, installs a launcher, an icon and a menu entry, and deletes
+   the Wine prefix.
 
 ### Options
 
 | Option | |
 |---|---|
 | `--dest DIR` | where to install (default `~/.local/share/nicepage-linux`) |
-| `--projects DIR` | folder for your sites, set on first install (default: Nicepage's own, `~/Documents/Nicepage`) |
+| `--projects DIR` | folder for your sites, set on first install (you can also change it later in Preferences) |
 | `--no-integration` | skip `~/.local/bin/nicepage` and the menu entry |
 
-A self-contained folder, with the sites inside it:
+To keep everything in one folder, with your sites inside it:
 
 ```sh
 ./install.sh --dest ~/Apps/Nicepage --projects ~/Apps/Nicepage/Projects Nicepage-8.7.0.exe
 ```
 
-### Updating or switching versions
+## First start
 
-Run `install.sh` again with the other installer. Your settings and sites are kept, and the version it
-replaces is moved to `DEST/previous` (one level, overwritten next time).
+1. **Start Nicepage** from your app menu (or run `nicepage`).
+2. **Sign in.** Nicepage opens its sign-in or sign-up page in your web browser, and the app picks it
+   up once you're signed in.
+3. **Choose your folders.** Open the main menu and, under **Application**, choose **Preferences...**:
+   - **Project Folder:** where Nicepage keeps your sites. It holds one `Site_…` folder per site
+     and is managed by Nicepage, so don't drop zips or other files in it.
+   - **Backup Folder:** where Nicepage saves site backups: before a newer Nicepage version updates
+     a site, and when you delete one (as `…-DELETED.zip`).
+   - **Export Folder:** where exported projects, HTML, WordPress and Joomla exports are saved.
 
-### Uninstall
+   A tidy setup is one folder with three subfolders, such as `~/Nicepage/Projects`,
+   `~/Nicepage/Backups` and `~/Nicepage/Exports`. Point each setting at its subfolder.
+4. **Bring your sites over** from Windows or macOS:
+   - On the old computer, open **Export / Import**, choose **Export Project**, and copy the zip over.
+     A project zip has a `site.json` file at the top level.
+   - On Linux, open **Export / Import** and choose **Import**.
+
+   HTML, WordPress and Joomla exports are for publishing. Nicepage can't import them back as
+   projects, and it reports them as "Invalid Nicepage Project File".
+
+## Shortcuts
+
+The installer adds:
+
+- **A menu entry:** `~/.local/share/applications/nicepage.desktop`. Pin it to your dock or panel
+  like any other app.
+- **A terminal command:** `nicepage` (a link in `~/.local/bin`).
+
+Both run `DEST/nicepage`, the launcher. Always start Nicepage through it: it points Nicepage at
+its settings folder, runs it as a native Wayland app where available, and works around a
+file-reading bug in the Node.js version this Electron uses. Running `DEST/electron/electron`
+directly skips all of that.
+
+### Making your own shortcut
+
+If you used `--no-integration`, or want the shortcut somewhere else, create
+`~/.local/share/applications/nicepage.desktop` with your install folder in place of `DEST`
+(the default is `~/.local/share/nicepage-linux`; use the full path, `~` doesn't work here):
+
+```ini
+[Desktop Entry]
+Type=Application
+Name=Nicepage
+Comment=Website builder
+Exec=DEST/nicepage %U
+Icon=DEST/nicepage.png
+Terminal=false
+Categories=Development;WebDevelopment;Graphics;
+StartupWMClass=Nicepage
+```
+
+Or give this prompt to your own AI coding agent (Claude Code, opencode, etc.) and let it set the
+shortcut up for your desktop:
+
+```text
+I installed Nicepage with nicepage-linux (https://github.com/ZachFB-Studios/nicepage-linux).
+Find the install folder: it contains the launcher script "nicepage", "nicepage.png" and an
+"electron" folder. The default is ~/.local/share/nicepage-linux. Then create a desktop entry at
+~/.local/share/applications/nicepage.desktop with Name=Nicepage, Exec=<full path to that
+nicepage launcher> %U, Icon=<full path to nicepage.png>, StartupWMClass=Nicepage,
+Terminal=false and Categories=Development;WebDevelopment;Graphics;. Use absolute paths. Exec must
+point to the "nicepage" launcher, never to electron/electron. Run update-desktop-database
+~/.local/share/applications if it's installed. Then tell me how to pin it to my dock or panel on
+my desktop environment. Don't change anything else without asking me.
+```
+
+## Updating or switching versions
+
+Run `install.sh` again with the other installer (use the same `--dest` if you changed it). Your
+settings, sites and folders are kept, and the version it replaces is moved to `DEST/previous`
+(one level, overwritten next time).
+
+## Uninstall
 
 ```sh
 rm -r ~/.local/share/nicepage-linux ~/.local/bin/nicepage ~/.local/share/applications/nicepage.desktop
 ```
 
-Your sites stay in the projects folder. Nicepage also writes a log to `~/.config/Nicepage/`.
+Your sites, backups and exports stay where you put them. Nicepage also writes a log to
+`~/.config/Nicepage/`.
 
 ## Layout
 
@@ -84,13 +157,9 @@ DEST/
   rerunning the script.
 - **SFTP publishing:** two optional native modules are Windows builds and don't load. The SSH library
   falls back to pure JavaScript, so SFTP should still work.
-- **Chromium sandbox:** some distros block it (Ubuntu 24.04+ restricts unprivileged user namespaces).
-  If Nicepage won't start, run `NICEPAGE_NO_SANDBOX=1 nicepage`, or set that variable in the menu
-  entry's `Exec=` line.
-- **Files on FUSE file systems (mergerfs etc.):** the Node.js inside Electron 29 reads files through
-  io_uring, which returned scrambled data from mergerfs. The import then failed with
-  "Invalid Nicepage Project File". The launcher sets `UV_USE_IO_URING=0` to prevent this. If you
-  start `electron/electron` directly, set that variable yourself.
+- **Nicepage won't start:** some distros block Chromium's sandbox (Ubuntu 24.04+ restricts
+  unprivileged user namespaces). Run `NICEPAGE_NO_SANDBOX=1 nicepage`. If that works, change the
+  menu entry's `Exec=` line to `env NICEPAGE_NO_SANDBOX=1 DEST/nicepage %U`.
 
 ## License
 
