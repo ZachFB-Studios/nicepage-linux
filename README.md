@@ -30,9 +30,12 @@ Debian/Ubuntu: `sudo apt install wine curl p7zip-full binutils file`
 mkdir -p ~/Apps/Nicepage/{Projects,Backups,Exports}
 cd ~/Apps/Nicepage
 git clone https://github.com/ZachFB-Studios/nicepage-linux
-mv ~/Downloads/Nicepage-*.exe .
-./nicepage-linux/install.sh --dest ~/Apps/Nicepage/app --projects ~/Apps/Nicepage/Projects Nicepage-*.exe
+./nicepage-linux/install.sh /path-to-your/Nicepage.exe --dest ~/Apps/Nicepage/app --projects ~/Apps/Nicepage/Projects
 ```
+
+Replace `/path-to-your/Nicepage.exe` with where you saved the installer, e.g. `~/Downloads/Nicepage-8.7.0.exe`.
+If the path has spaces, quote it and use `$HOME` instead of `~` (the shell doesn't expand `~` inside quotes):
+`"$HOME/My Downloads/Nicepage-8.7.0.exe"`.
 
 You end up with:
 
@@ -42,8 +45,7 @@ You end up with:
 ├── Projects/             your sites
 ├── Backups/              set as Backup Folder in Preferences (see First start)
 ├── Exports/              set as Export Folder in Preferences
-├── nicepage-linux/       this repo (rerun install.sh from here to update)
-└── Nicepage-X.Y.Z.exe    the installer you used
+└── nicepage-linux/       this repo (rerun install.sh from here to update)
 ```
 
 Prefer another place? Change the paths, or leave out `--dest`/`--projects` for the defaults:
