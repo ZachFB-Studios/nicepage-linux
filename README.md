@@ -1,6 +1,6 @@
 # nicepage-linux
 
-Run the [Nicepage](https://nicepage.com) website builder natively on Linux, with no Wine at runtime.
+Native electron app on linux for the [Nicepage](https://nicepage.com) website builder. Import your Winblows projects and start making websites.
 
 Nicepage is only released for Windows and macOS, but it's an Electron app: the app itself is
 JavaScript that runs the same on any platform. This script takes that JavaScript out of the
