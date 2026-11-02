@@ -23,13 +23,31 @@ Debian/Ubuntu: `sudo apt install wine curl p7zip-full binutils file`
 
 1. Download the Windows installer from [nicepage.com/download](https://nicepage.com/download)
    (`Nicepage-X.Y.Z.exe`). Any version works, including older ones your license covers.
-2. Get this repo and run the script with your installer:
+2. Run these in a terminal. They keep everything in one folder, `~/Apps/Nicepage`. `mkdir -p` only
+   creates what's missing, so an existing `~/Apps` is left alone:
 
 ```sh
+mkdir -p ~/Apps/Nicepage/{Projects,Backups,Exports}
+cd ~/Apps/Nicepage
 git clone https://github.com/ZachFB-Studios/nicepage-linux
-cd nicepage-linux
-./install.sh ~/Downloads/Nicepage-8.7.0.exe
+mv ~/Downloads/Nicepage-*.exe .
+./nicepage-linux/install.sh --dest ~/Apps/Nicepage/app --projects ~/Apps/Nicepage/Projects Nicepage-*.exe
 ```
+
+You end up with:
+
+```
+~/Apps/Nicepage/
+├── app/                  Nicepage itself (launcher, Electron, settings)
+├── Projects/             your sites
+├── Backups/              set as Backup Folder in Preferences (see First start)
+├── Exports/              set as Export Folder in Preferences
+├── nicepage-linux/       this repo (rerun install.sh from here to update)
+└── Nicepage-X.Y.Z.exe    the installer you used
+```
+
+Prefer another place? Change the paths, or leave out `--dest`/`--projects` for the defaults:
+the app in `~/.local/share/nicepage-linux` and sites in `~/Documents/Nicepage`.
 
 It takes a few minutes and opens no windows. When it's done, **Nicepage** is in your app menu, and
 `nicepage` starts it from a terminal.
@@ -51,12 +69,6 @@ What it does:
 | `--projects DIR` | folder for your sites, set on first install (you can also change it later in Preferences) |
 | `--no-integration` | skip `~/.local/bin/nicepage` and the menu entry |
 
-To keep everything in one folder, with your sites inside it:
-
-```sh
-./install.sh --dest ~/Apps/Nicepage --projects ~/Apps/Nicepage/Projects Nicepage-8.7.0.exe
-```
-
 ## First start
 
 1. **Start Nicepage** from your app menu (or run `nicepage`).
@@ -69,8 +81,8 @@ To keep everything in one folder, with your sites inside it:
      a site, and when you delete one (as `…-DELETED.zip`).
    - **Export Folder:** where exported projects, HTML, WordPress and Joomla exports are saved.
 
-   A tidy setup is one folder with three subfolders, such as `~/Nicepage/Projects`,
-   `~/Nicepage/Backups` and `~/Nicepage/Exports`. Point each setting at its subfolder.
+   With the recommended install, point them at `~/Apps/Nicepage/Projects`, `Backups` and `Exports`
+   (Project Folder is already set).
 4. **Bring your sites over** from Windows or macOS:
    - On the old computer, open **Export / Import**, choose **Export Project**, and copy the zip over.
      A project zip has a `site.json` file at the top level.
@@ -134,8 +146,10 @@ settings, sites and folders are kept, and the version it replaces is moved to `D
 ## Uninstall
 
 ```sh
-rm -r ~/.local/share/nicepage-linux ~/.local/bin/nicepage ~/.local/share/applications/nicepage.desktop
+rm -r ~/Apps/Nicepage/app ~/.local/bin/nicepage ~/.local/share/applications/nicepage.desktop
 ```
+
+With the default install, remove `~/.local/share/nicepage-linux` instead of `~/Apps/Nicepage/app`.
 
 Your sites, backups and exports stay where you put them. Nicepage also writes a log to
 `~/.config/Nicepage/`.
